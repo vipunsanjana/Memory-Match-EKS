@@ -222,7 +222,11 @@ npm run start     # Start both frontend and backend
 ## 🙌 Credits
 
 Created with ❤️ by **Vipun Sanjana**
+
+---
 Former Software Engineer @ WSO2 - Cloud Security Operations Center
+
+---
 Powered by **React**, **Node.js**, **Docker**, **CI/CD**, **Ingress**,**AWS** and **Kubernetes**
 
 ---
