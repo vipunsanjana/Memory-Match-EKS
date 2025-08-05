@@ -82,13 +82,24 @@ git clone <repo-url>
 cd memory-game
 ````
 
-### 2. Run Locally with Docker Compose
-
-Create a `docker-compose.yml` if not already available and run:
+### 2. Run Frontend and Backend Separately
+Frontend
 
 ```bash
-docker-compose up --build
-```
+cd frontend
+docker build -t memory-frontend .
+docker run -p 5173:80 memory-frontend
+````
+
+Backend
+
+Open a new terminal:
+
+```bash
+cd backend
+docker build -t memory-backend .
+docker run -p 3001:3001 memory-backend
+````
 
 Access:
 
