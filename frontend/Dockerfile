@@ -12,14 +12,11 @@ FROM nginx:alpine
 # Clean default NGINX files
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy built frontend
+# Copy built frontend files
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy custom NGINX config
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
-
-# Expose port
+# Expose port 80
 EXPOSE 80
 
-# Start NGINX
+# Start NGINX server
 CMD ["nginx", "-g", "daemon off;"]
