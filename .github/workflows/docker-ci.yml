@@ -22,9 +22,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: 📦 Build and push Docker image
+      - name: 📦 Build and push frontend image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./frontend
+          file: ./frontend/Dockerfile
           push: true
-          tags: vipunsanjana/memorygame:latest
+          tags: vipunsanjana/memorygame-frontend:latest
+
+      - name: 📦 Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: vipunsanjana/memorygame-backend:latest
