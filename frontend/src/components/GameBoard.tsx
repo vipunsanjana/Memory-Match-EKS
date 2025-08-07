@@ -28,18 +28,30 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
   const [isGameCompleted, setIsGameCompleted] = useState(false);
   const [canFlip, setCanFlip] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Start new game
   const startNewGame = async () => {
     try {
+      setErrorMessage(null);
       const response = await fetch('/api/game/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ difficulty })
       });
-      
+
       const data = await response.json();
-      console.log(response)
+
+      if (!response.ok) {
+        setErrorMessage(data.error || 'Failed to start game');
+        return;
+      }
+
+      if (!data.cards) {
+        setErrorMessage('Invalid response from server');
+        return;
+      }
+
       setGameId(data.gameId);
       setCards(data.cards);
       setTimeRemaining(data.timeLimit);
@@ -49,8 +61,9 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
       setScore(0);
       setIsGameCompleted(false);
       setShowConfetti(false);
+      setCanFlip(true);
     } catch (error) {
-      console.error('Failed to start game:', error);
+      setErrorMessage('Failed to start game: ' + (error as Error).message);
     }
   };
 
@@ -59,19 +72,30 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
     if (!canFlip || isGameCompleted) return;
 
     try {
+      setErrorMessage(null);
       const response = await fetch(`/api/game/${gameId}/move`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cardId })
+        body: JSON.stringify({ cardId }),
       });
-      
+
       const data = await response.json();
-      console.log(data)
+
+      if (!response.ok) {
+        setErrorMessage(data.error || 'Failed to make move');
+        return;
+      }
+
+      if (!data.cards) {
+        setErrorMessage('Invalid response from server');
+        return;
+      }
+
       setCards(data.cards);
       setMoves(data.moves);
       setMatches(data.matches);
       setCanFlip(data.canFlip);
-      
+
       if (data.gameCompleted) {
         setIsGameCompleted(true);
         setScore(data.score);
@@ -79,16 +103,14 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
         setTimeout(() => setShowConfetti(false), 5000);
       }
 
-      // If no match found, reset flipped cards after delay
       if (!data.matchFound && !data.canFlip) {
         setTimeout(() => {
           setCanFlip(true);
-          // Refresh game state
           fetchGameStatus();
         }, 1500);
       }
     } catch (error) {
-      console.error('Failed to make move:', error);
+      setErrorMessage('Failed to make move: ' + (error as Error).message);
     }
   };
 
@@ -97,21 +119,32 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
     if (!gameId) return;
 
     try {
+      setErrorMessage(null);
       const response = await fetch(`/api/game/${gameId}`);
       const data = await response.json();
-      
+
+      if (!response.ok) {
+        setErrorMessage(data.error || 'Failed to fetch game status');
+        return;
+      }
+
+      if (!data.cards) {
+        setErrorMessage('Invalid response from server');
+        return;
+      }
+
       setCards(data.cards);
       setMoves(data.moves);
       setMatches(data.matches);
       setTimeRemaining(data.timeRemaining);
       setTotalPairs(data.totalPairs);
-      
+
       if (data.isCompleted && !isGameCompleted) {
         setIsGameCompleted(true);
         setScore(data.score);
       }
     } catch (error) {
-      console.error('Failed to fetch game status:', error);
+      setErrorMessage('Failed to fetch game status: ' + (error as Error).message);
     }
   };
 
@@ -132,7 +165,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
     }
   }, [gameId, timeRemaining, isGameCompleted]);
 
-  // Start game on mount
+  // Start game on difficulty change
   useEffect(() => {
     startNewGame();
   }, [difficulty]);
@@ -170,6 +203,13 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
             New Game
           </motion.button>
         </div>
+
+        {/* Error Message */}
+        {errorMessage && (
+          <div className="mb-4 p-3 bg-red-600 text-white rounded text-center">
+            {errorMessage}
+          </div>
+        )}
 
         {/* Game Stats */}
         <GameStats 
