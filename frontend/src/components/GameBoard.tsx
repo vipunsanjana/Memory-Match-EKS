@@ -39,6 +39,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
       });
       
       const data = await response.json();
+      console.log(response)
       setGameId(data.gameId);
       setCards(data.cards);
       setTimeRemaining(data.timeLimit);
@@ -65,6 +66,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
       });
       
       const data = await response.json();
+      console.log(data)
       setCards(data.cards);
       setMoves(data.moves);
       setMatches(data.matches);
