@@ -61,6 +61,10 @@ jobs:
 
       - name: 📄 Apply deployment, service, and ingress manifests
         run: |
+
+          echo "Applying Kubernetes manifests..."
+          kubectl apply -f k8s/base/namespace.yaml
+
           echo "Applying backend deployment and service..."
           kubectl apply -f k8s/base/backend-deployment.yaml
           kubectl apply -f k8s/base/backend-service.yaml
