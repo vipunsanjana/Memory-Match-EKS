@@ -14,21 +14,18 @@ jobs:
     steps:
       - name: 🧾 Checkout code
         uses: actions/checkout@v4
-      - name: Echo after checkout
-        run: echo "✅ Checkout done"
+      - run: echo "✅ Checkout done"
 
       - name: 🔧 Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Echo after Docker Buildx setup
-        run: echo "✅ Docker Buildx setup done"
+      - run: echo "✅ Docker Buildx setup done"
 
       - name: 🔑 Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Echo after Docker Hub login
-        run: echo "✅ Docker Hub login done"
+      - run: echo "✅ Docker Hub login done"
 
       - name: 📦 Build and push frontend image
         uses: docker/build-push-action@v5
@@ -37,8 +34,7 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: vipunsanjana/memorygame-frontend:${{ env.IMAGE_TAG }}
-      - name: Echo after frontend image build and push
-        run: echo "✅ Frontend image build and push done with tag ${{ env.IMAGE_TAG }}"
+      - run: echo "✅ Frontend image pushed with tag ${{ env.IMAGE_TAG }}"
 
       - name: 📦 Build and push backend image
         uses: docker/build-push-action@v5
@@ -47,48 +43,57 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: vipunsanjana/memorygame-backend:${{ env.IMAGE_TAG }}
-      - name: Echo after backend image build and push
-        run: echo "✅ Backend image build and push done with tag ${{ env.IMAGE_TAG }}"
+      - run: echo "✅ Backend image pushed with tag ${{ env.IMAGE_TAG }}"
 
-      - name: Configure AWS credentials
+      - name: 🔐 Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
-      - name: Echo after AWS credentials config
-        run: echo "✅ AWS credentials configured"
+      - run: echo "✅ AWS credentials configured"
 
-      - name: Update kubeconfig for EKS
+      - name: 📡 Update kubeconfig for EKS
         run: |
-          echo "Updating kubeconfig for cluster demo-cluster"
+          echo "Updating kubeconfig for demo-cluster..."
           aws eks update-kubeconfig --name demo-cluster --region us-east-1
-          echo "✅ kubeconfig updated"
+          echo "✅ Kubeconfig updated"
 
-      - name: Update backend deployment image
+      - name: 📄 Apply deployment, service, and ingress manifests
         run: |
-          echo "Updating backend deployment image to vipunsanjana/memorygame-backend:${{ env.IMAGE_TAG }}"
-          kubectl set image deployment/memorygame-backend memorygame-backend=vipunsanjana/memorygame-backend:${{ env.IMAGE_TAG }} -n game-2048
-          echo "✅ Backend deployment updated"
-
-      - name: Update frontend deployment image
-        run: |
-          echo "Updating frontend deployment image to vipunsanjana/memorygame-frontend:${{ env.IMAGE_TAG }}"
-          kubectl set image deployment/memorygame-frontend memorygame-frontend=vipunsanjana/memorygame-frontend:${{ env.IMAGE_TAG }} -n game-2048
-          echo "✅ Frontend deployment updated"
-
-      - name: Apply service and ingress manifests
-        run: |
-          echo "Applying backend service"
+          echo "Applying backend deployment and service..."
+          kubectl apply -f k8s/base/backend-deployment.yaml
           kubectl apply -f k8s/base/backend-service.yaml
-          echo "Applying frontend service"
-          kubectl apply -f k8s/base/frontend-service.yaml
-          echo "Applying ingress"
-          kubectl apply -f k8s/base/ingress.yaml
-          echo "✅ Services and ingress applied"
 
-      - name: Get pods status
+          echo "Applying frontend deployment and service..."
+          kubectl apply -f k8s/base/frontend-deployment.yaml
+          kubectl apply -f k8s/base/frontend-service.yaml
+
+          echo "Applying ingress..."
+          kubectl apply -f k8s/base/ingress.yaml
+
+          echo "✅ All manifests applied"
+
+      - name: 🔄 Update backend deployment image
         run: |
+          echo "Updating backend deployment image..."
+          kubectl set image deployment/memorygame-backend memorygame-backend=vipunsanjana/memorygame-backend:${{ env.IMAGE_TAG }} -n game-2048
+          echo "✅ Backend image updated"
+
+      - name: 🔄 Update frontend deployment image
+        run: |
+          echo "Updating frontend deployment image..."
+          kubectl set image deployment/memorygame-frontend memorygame-frontend=vipunsanjana/memorygame-frontend:${{ env.IMAGE_TAG }} -n game-2048
+          echo "✅ Frontend image updated"
+
+      - name: ⏳ Wait for backend rollout
+        run: kubectl rollout status deployment/memorygame-backend -n game-2048
+
+      - name: ⏳ Wait for frontend rollout
+        run: kubectl rollout status deployment/memorygame-frontend -n game-2048
+
+      - name: 📦 Get pods status
+        run: |
+          echo "Fetching pod status..."
           kubectl get pods -n game-2048
-      - name: Echo pods status fetched
-        run: echo "✅ Pods status fetched"
+          echo "✅ Pods status fetched"
