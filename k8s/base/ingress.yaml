@@ -11,7 +11,7 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - host: memorygame.vipunsanjana.com
+    - host: memorygame.vipunsanjana.dev
       http:
         paths:
           - path: /
