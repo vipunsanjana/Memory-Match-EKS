@@ -204,13 +204,6 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
           </motion.button>
         </div>
 
-        {/* Error Message */}
-        {errorMessage && (
-          <div className="mb-4 p-3 bg-red-600 text-white rounded text-center">
-            {errorMessage}
-          </div>
-        )}
-
         {/* Game Stats */}
         <GameStats 
           moves={moves}
