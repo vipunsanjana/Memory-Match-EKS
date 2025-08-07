@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import MainMenu from './components/MainMenu';
 import GameBoard from './components/GameBoard';
 import Leaderboard from './components/Leaderboard';
@@ -8,16 +8,6 @@ type GameState = 'menu' | 'playing' | 'leaderboard';
 function App() {
   const [gameState, setGameState] = useState<GameState>('menu');
   const [difficulty, setDifficulty] = useState('medium');
-
-  // Log whenever gameState changes
-  useEffect(() => {
-    console.log(`Game state changed to: ${gameState}`);
-  }, [gameState]);
-
-  // Log whenever difficulty changes
-  useEffect(() => {
-    console.log(`Difficulty set to: ${difficulty}`);
-  }, [difficulty]);
 
   const handleStartGame = (selectedDifficulty: string) => {
     console.log(`Starting game with difficulty: ${selectedDifficulty}`);
@@ -31,9 +21,12 @@ function App() {
   };
 
   const handleShowLeaderboard = () => {
-    console.log('Showing leaderboard');
+    console.log('Navigating to leaderboard');
     setGameState('leaderboard');
   };
+
+  console.log(`Current game state: ${gameState}`);
+  console.log(`Current difficulty: ${difficulty}`);
 
   switch (gameState) {
     case 'playing':

@@ -55,8 +55,8 @@ jobs:
 
       - name: 📡 Update kubeconfig for EKS
         run: |
-          echo "Updating kubeconfig for demo-cluster..."
-          aws eks update-kubeconfig --name demo-cluster --region us-east-1
+          echo "Updating kubeconfig for vipun-cluster..."
+          aws eks update-kubeconfig --name vipun-cluster --region us-east-1
           echo "✅ Kubeconfig updated"
 
       - name: 📄 Apply deployment, service, and ingress manifests

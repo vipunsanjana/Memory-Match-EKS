@@ -4,7 +4,7 @@ metadata:
   name: memorygame-frontend
   namespace: game-2048
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: memorygame-frontend
