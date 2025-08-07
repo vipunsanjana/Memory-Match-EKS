@@ -29,14 +29,11 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
   const [canFlip, setCanFlip] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Start new game
   const startNewGame = async () => {
-    setIsLoading(true);
-    setErrorMessage(null);
-
     try {
+      setErrorMessage(null);
       const response = await fetch('/api/game/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,13 +44,11 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
 
       if (!response.ok) {
         setErrorMessage(data.error || 'Failed to start game');
-        setIsLoading(false);
         return;
       }
 
       if (!data.cards) {
         setErrorMessage('Invalid response from server');
-        setIsLoading(false);
         return;
       }
 
@@ -69,18 +64,15 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
       setCanFlip(true);
     } catch (error) {
       setErrorMessage('Failed to start game: ' + (error as Error).message);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   // Handle card click
   const handleCardClick = async (cardId: number) => {
-    if (!canFlip || isGameCompleted || !gameId || cards.length === 0 || isLoading) return;
-
-    setErrorMessage(null);
+    if (!canFlip || isGameCompleted) return;
 
     try {
+      setErrorMessage(null);
       const response = await fetch(`/api/game/${gameId}/move`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -126,9 +118,8 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
   const fetchGameStatus = async () => {
     if (!gameId) return;
 
-    setErrorMessage(null);
-
     try {
+      setErrorMessage(null);
       const response = await fetch(`/api/game/${gameId}`);
       const data = await response.json();
 
@@ -193,7 +184,6 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
             className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 text-white hover:bg-white/20 transition-colors"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            disabled={isLoading}
           >
             <Home size={20} />
             Menu
@@ -208,7 +198,6 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
             className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 text-white hover:bg-white/20 transition-colors"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            disabled={isLoading}
           >
             <RotateCcw size={20} />
             New Game
@@ -237,7 +226,6 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          style={{ pointerEvents: isLoading ? 'none' : 'auto', opacity: isLoading ? 0.5 : 1 }}
         >
           {cards.map((card) => (
             <GameCard
@@ -247,7 +235,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
               isFlipped={card.isFlipped}
               isMatched={card.isMatched}
               onClick={() => handleCardClick(card.id)}
-              disabled={!canFlip || isGameCompleted || isLoading}
+              disabled={!canFlip || isGameCompleted}
             />
           ))}
         </motion.div>
