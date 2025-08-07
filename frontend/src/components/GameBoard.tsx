@@ -32,7 +32,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
   // Start new game
   const startNewGame = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/game/start', {
+      const response = await fetch('/api/game/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ difficulty })
@@ -58,7 +58,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
     if (!canFlip || isGameCompleted) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/api/game/${gameId}/move`, {
+      const response = await fetch(`/api/game/${gameId}/move`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ cardId })
@@ -95,7 +95,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
     if (!gameId) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/api/game/${gameId}`);
+      const response = await fetch(`/api/game/${gameId}`);
       const data = await response.json();
       
       setCards(data.cards);

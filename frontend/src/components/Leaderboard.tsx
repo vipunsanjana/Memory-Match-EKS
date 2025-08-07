@@ -23,7 +23,7 @@ export default function Leaderboard({ onBack }: LeaderboardProps) {
 
   const fetchLeaderboard = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/leaderboard');
+      const response = await fetch('/api/leaderboard');
       const data = await response.json();
       setScores(data);
     } catch (error) {

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: memorygame-backend-service
+  namespace: game-2048
+spec:
+  selector:
+    app: memorygame-backend
+  ports:
+    - protocol: TCP
+      port: 3001
+      targetPort: 3001

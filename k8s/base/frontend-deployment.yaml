@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memorygame-frontend
+  namespace: game-2048
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: memorygame-frontend
+  template:
+    metadata:
+      labels:
+        app: memorygame-frontend
+    spec:
+      containers:
+        - name: memorygame-frontend
+          image: vipunsanjana/memorygame-frontend:latest
+          ports:
+            - containerPort: 80
