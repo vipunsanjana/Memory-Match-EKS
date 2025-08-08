@@ -41,7 +41,7 @@ export default function MainMenu({ onStartGame }: MainMenuProps) {
           <h1 className="text-4xl font-bold text-white mb-2">Memory Game</h1>
           <p className="text-white/80 text-lg">Test your memory skills!</p>
           <div className="text-white/60 text-sm mt-2">
-            By Vipun Sanjana - Former Software Engineer @WSO2<br></br>
+            By Vipun Sanjana - Former Intern Software Engineer @WSO2<br></br>
             (Cloud Security Operations Center)
           </div>
         </motion.div>
