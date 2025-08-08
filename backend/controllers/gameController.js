@@ -3,7 +3,7 @@ const GameService = require('../services/GameService');
 class GameController {
   constructor() {
     this.gameService = new GameService();
-    
+
     // Cleanup old sessions every hour
     setInterval(() => {
       this.gameService.cleanupOldSessions();
@@ -20,21 +20,23 @@ class GameController {
     }
   };
 
-  makeMove = (req, res) => {
-    try {
-      const { gameId } = req.params;
-      const { cardId } = req.body;
-      
-      const result = this.gameService.makeMove(gameId, cardId);
-      res.json(result);
-    } catch (error) {
-      if (error.message === 'Game not found') {
-        res.status(404).json({ error: error.message });
-      } else {
-        res.status(400).json({ error: error.message });
-      }
+  async makeMove(gameId, cardId) {
+    let game = this.gameSessions.get(gameId);
+
+    // Retry if game not found yet (waits for backend init)
+    let retries = 5; // try up to 5 times
+    while (!game && retries > 0) {
+      await new Promise(res => setTimeout(res, 50)); // wait 50ms
+      game = this.gameSessions.get(gameId);
+      retries--;
     }
-  };
+
+    if (!game) {
+      throw new Error(`Game ${gameId} not found after retries`);
+    }
+
+    return game.flipCard(cardId);
+  }
 
   getGameStatus = (req, res) => {
     try {
