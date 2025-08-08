@@ -10,47 +10,45 @@ class GameController {
     }, 60 * 60 * 1000);
   }
 
-  startGame = (req, res) => {
+  startGame = async (req, res) => {
     try {
       const { difficulty = 'medium' } = req.body;
-      const gameData = this.gameService.startNewGame(difficulty);
+      const gameData = await this.gameService.startNewGame(difficulty); // await if async
       res.json(gameData);
     } catch (error) {
       res.status(400).json({ error: error.message });
     }
   };
 
-  async makeMove(gameId, cardId) {
-    let game = this.gameSessions.get(gameId);
-
-    // Retry if game not found yet (waits for backend init)
-    let retries = 5; // try up to 5 times
-    while (!game && retries > 0) {
-      await new Promise(res => setTimeout(res, 50)); // wait 50ms
-      game = this.gameSessions.get(gameId);
-      retries--;
-    }
-
-    if (!game) {
-      throw new Error(`Game ${gameId} not found after retries`);
-    }
-
-    return game.flipCard(cardId);
-  }
-
-  getGameStatus = (req, res) => {
+  makeMove = async (req, res) => {
     try {
       const { gameId } = req.params;
-      const gameState = this.gameService.getGameStatus(gameId);
+      const { cardId } = req.body;
+
+      const result = await this.gameService.makeMove(gameId, cardId); // await if async
+      res.json(result);
+    } catch (error) {
+      if (error.message === 'Game not found') {
+        res.status(404).json({ error: error.message });
+      } else {
+        res.status(400).json({ error: error.message });
+      }
+    }
+  };
+
+  getGameStatus = async (req, res) => {
+    try {
+      const { gameId } = req.params;
+      const gameState = await this.gameService.getGameStatus(gameId);
       res.json(gameState);
     } catch (error) {
       res.status(404).json({ error: error.message });
     }
   };
 
-  getLeaderboard = (req, res) => {
+  getLeaderboard = async (req, res) => {
     try {
-      const leaderboard = this.gameService.getLeaderboard();
+      const leaderboard = await this.gameService.getLeaderboard();
       res.json(leaderboard);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch leaderboard' });
