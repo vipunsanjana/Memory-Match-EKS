@@ -10,8 +10,11 @@ This project is deployed using:
 
 - 🐳 **Docker + Docker Hub**
 - ☸️ **Kubernetes (Amazon EKS)**
-- 🌐 **NGINX Ingress Controller**
-- ⚙️ **GitHub Actions for CI**
+- 🌐 **Ingress Controller**
+- 🛡️ **AWS Application Load Balancer (ALB)**
+- ⚙️ **GitHub Actions for CICD**
+- 🖥️ **AWS Fargate for Serverless Compute**
+- 📦 **Helm for Kubernetes Manifest Management**
 - 📦 **Separated Frontend & Backend structure**
 
 ---
@@ -21,23 +24,27 @@ This project is deployed using:
 ```
 
 memory-game/
-├── frontend/                  # React + Vite + Tailwind + TypeScript
+├── frontend/                      # React + Vite + Tailwind + TypeScript
 │   ├── src/
 │   └── Dockerfile
-├── backend/                   # Node.js + Express
+├── backend/                       # Node.js + Express
 │   ├── controllers/
 │   ├── service/
 │   ├── middleware/
 │   ├── routes/
 │   ├── server.js
 │   └── Dockerfile
-├── k8s/                       # Kubernetes manifests
-│   ├── ingress.yaml
-│   ├── frontend-deployment.yaml
-│   ├── backend-deployment.yaml
+├── k8s/base/                       # Kubernetes manifests
+│   ├── namespace.yaml              # Namespace definition for isolation
+│   ├── backend-deployment.yaml     # Backend Deployment
+│   ├── backend-service.yaml        # Backend Service
+│   ├── frontend-deployment.yaml    # Frontend Deployment
+│   ├── frontend-service.yaml       # Frontend Service
+│   ├── ingress.yaml                # Ingress Controller configuration
 ├── .github/workflows/
-│   └── docker-ci.yml          # GitHub Actions workflow
+│   └── docker-ci.yml               # GitHub Actions workflow for CI/CD
 └── README.md
+
 
 ````
 
