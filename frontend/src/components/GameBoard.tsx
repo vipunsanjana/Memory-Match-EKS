@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { motion } from 'framer-motion';
 import GameCard from './GameCard';
 import GameStats from './GameStats';
@@ -34,18 +35,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
   const startNewGame = async () => {
     try {
       setErrorMessage(null);
-      const response = await fetch('/api/game/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ difficulty })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setErrorMessage(data.error || 'Failed to start game');
-        return;
-      }
+      const { data } = await axios.post('/api/game/start', { difficulty });
 
       if (!data.cards) {
         setErrorMessage('Invalid response from server');
@@ -62,8 +52,8 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
       setIsGameCompleted(false);
       setShowConfetti(false);
       setCanFlip(true);
-    } catch (error) {
-      setErrorMessage('Failed to start game: ' + (error as Error).message);
+    } catch (error: any) {
+      setErrorMessage(error.response?.data?.error || error.message || 'Failed to start game');
     }
   };
 
@@ -73,18 +63,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
 
     try {
       setErrorMessage(null);
-      const response = await fetch(`/api/game/${gameId}/move`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cardId }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setErrorMessage(data.error || 'Failed to make move');
-        return;
-      }
+      const { data } = await axios.post(`/api/game/${gameId}/move`, { cardId });
 
       if (!data.cards) {
         setErrorMessage('Invalid response from server');
@@ -109,8 +88,8 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
           fetchGameStatus();
         }, 1500);
       }
-    } catch (error) {
-      setErrorMessage('Failed to make move: ' + (error as Error).message);
+    } catch (error: any) {
+      setErrorMessage(error.response?.data?.error || error.message || 'Failed to make move');
     }
   };
 
@@ -120,13 +99,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
 
     try {
       setErrorMessage(null);
-      const response = await fetch(`/api/game/${gameId}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        setErrorMessage(data.error || 'Failed to fetch game status');
-        return;
-      }
+      const { data } = await axios.get(`/api/game/${gameId}`);
 
       if (!data.cards) {
         setErrorMessage('Invalid response from server');
@@ -143,8 +116,8 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
         setIsGameCompleted(true);
         setScore(data.score);
       }
-    } catch (error) {
-      setErrorMessage('Failed to fetch game status: ' + (error as Error).message);
+    } catch (error: any) {
+      setErrorMessage(error.response?.data?.error || error.message || 'Failed to fetch game status');
     }
   };
 
