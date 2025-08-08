@@ -11,7 +11,8 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-    - http:
+    - host: game.vipunsanjana.dev
+      http:
         paths:
           - path: /api
             pathType: Prefix
