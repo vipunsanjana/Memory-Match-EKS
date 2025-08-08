@@ -63,16 +63,21 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
 
     try {
       setErrorMessage(null);
+      setCanFlip(false); // Immediately disable flipping to prevent rapid clicks
+
       const { data } = await axios.post(`/api/game/${gameId}/move`, { cardId });
 
       if (!data.cards) {
         setErrorMessage('Invalid response from server');
+        setCanFlip(true);
         return;
       }
 
       setCards(data.cards);
       setMoves(data.moves);
       setMatches(data.matches);
+
+      // Keep canFlip based on server response
       setCanFlip(data.canFlip);
 
       if (data.gameCompleted) {
@@ -82,14 +87,18 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
         setTimeout(() => setShowConfetti(false), 5000);
       }
 
+      // If no match found and can't flip, re-enable flipping after delay and sync status
       if (!data.matchFound && !data.canFlip) {
         setTimeout(() => {
           setCanFlip(true);
           fetchGameStatus();
         }, 1500);
+      } else {
+        // For other cases (like match found), canFlip is controlled by server response
       }
     } catch (error: any) {
       setErrorMessage(error.response?.data?.error || error.message || 'Failed to make move');
+      setCanFlip(true); // Re-enable flipping on error
     }
   };
 
@@ -128,6 +137,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
         setTimeRemaining(prev => {
           if (prev <= 1) {
             setIsGameCompleted(true);
+            setCanFlip(false); // Disable flipping when time is up
             return 0;
           }
           return prev - 1;
@@ -138,17 +148,18 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
     }
   }, [gameId, timeRemaining, isGameCompleted]);
 
-  // Start game on difficulty change
+  // Start new game on difficulty change
   useEffect(() => {
     startNewGame();
   }, [difficulty]);
 
+  // Determine grid columns based on total pairs
   const gridCols = totalPairs <= 6 ? 'grid-cols-3' : totalPairs <= 8 ? 'grid-cols-4' : 'grid-cols-4 sm:grid-cols-6';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 p-4">
       {showConfetti && <Confetti recycle={false} numberOfPieces={200} />}
-      
+
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
@@ -178,7 +189,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
         </div>
 
         {/* Game Stats */}
-        <GameStats 
+        <GameStats
           moves={moves}
           matches={matches}
           totalPairs={totalPairs}
@@ -186,8 +197,13 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
           difficulty={difficulty}
         />
 
+        {/* Error Message */}
+        {errorMessage && (
+          <div className="text-red-400 text-center mb-4">{errorMessage}</div>
+        )}
+
         {/* Game Board */}
-        <motion.div 
+        <motion.div
           className={`grid ${gridCols} gap-3 sm:gap-4 justify-center max-w-2xl mx-auto mb-8`}
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -222,11 +238,11 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
               <div className="text-6xl mb-4">
                 {matches === totalPairs ? '🎉' : '⏰'}
               </div>
-              
+
               <h2 className="text-2xl font-bold mb-4 text-gray-800">
-                {matches === totalPairs ? 'Congratulations!' : 'Time\'s Up!'}
+                {matches === totalPairs ? 'Congratulations!' : "Time's Up!"}
               </h2>
-              
+
               {matches === totalPairs && (
                 <div className="mb-6">
                   <div className="flex items-center justify-center gap-2 mb-2">
@@ -249,7 +265,7 @@ export default function GameBoard({ difficulty, onBackToMenu }: GameBoardProps) 
                 >
                   Play Again
                 </motion.button>
-                
+
                 <motion.button
                   onClick={onBackToMenu}
                   className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
